@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#f6f5f1" />
+  <title>Bellisima — Move beautifully</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="announcement">A little motivation, on us. <span>Free delivery on orders over ₦75,000</span></div>
+  <header class="site-header">
+    <a class="wordmark" href="#home" aria-label="Bellisima home">bellisima<span>®</span></a>
+    <nav class="main-nav" aria-label="Main navigation">
+      <a href="#shop" class="active">Shop</a><a href="#shop" data-category-link="New">New arrivals</a><a href="#story">Our story</a>
+    </nav>
+    <div class="header-actions">
+      <button class="icon-button search-toggle" aria-label="Search products"><svg viewBox="0 0 24 24"><circle cx="10.8" cy="10.8" r="6.8"/><path d="m16 16 4.5 4.5"/></svg></button>
+      <button class="account-button" id="accountOpen">Log in</button>
+      <button class="bag-button" id="cartOpen" aria-label="Open shopping bag">Bag <span id="bagCount">0</span></button>
+    </div>
+  </header>
+  <main id="home">
+    <section class="hero">
+      <img src="https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=2000&q=85" alt="Sunlit modern strength training studio" />
+      <div class="hero-shade"></div>
+      <div class="hero-copy"><p class="eyebrow light">MOVE IN YOUR ELEMENT</p><h1>Made for your<br><em>strongest self.</em></h1><p>Thoughtful essentials for every version of your movement.</p><a class="button button-light" href="#shop">Shop the collection <span>↗</span></a></div>
+      <div class="hero-index">01 <span></span> 03</div>
+      <div class="hero-caption">TRAIN WELL. FEEL EVERYTHING.</div>
+    </section>
+    <section class="intro" id="story"><p class="eyebrow">THE BELLISIMA EDIT</p><p class="intro-line">A considered collection of <em>feel-good</em> gear,<br class="desktop-break"> designed to move with you.</p><a href="#shop" class="text-link">A better kind of activewear <span>↗</span></a></section>
+    <section class="shop-section" id="shop">
+      <div class="shop-heading"><div><p class="eyebrow">FIND YOUR FLOW</p><h2>The essentials</h2></div><button class="filter-trigger" id="filterToggle">Filter & sort <span class="filter-symbol">≡</span></button></div>
+      <div class="category-row" role="group" aria-label="Filter products by category"><button class="category active" data-category="All">All pieces <span>08</span></button><button class="category" data-category="Leggings">Leggings</button><button class="category" data-category="Tops">Tops</button><button class="category" data-category="Accessories">Accessories</button></div>
+      <div class="filter-panel" id="filterPanel"><label>Sort by <select id="sortSelect"><option value="featured">Featured</option><option value="low">Price: low to high</option><option value="high">Price: high to low</option></select></label><label>Colour <select id="colorSelect"><option value="All">All colours</option><option>Black</option><option>Olive</option><option>Stone</option><option>Plum</option></select></label></div>
+      <div class="product-grid" id="productGrid"></div>
+      <div class="view-all"><span>MADE TO MOVE. MADE FOR YOU.</span><a href="#shop" class="text-link">Explore all pieces <span>↗</span></a></div>
+    </section>
+    <section class="quote-band"><p class="eyebrow">A NOTE TO YOURSELF</p><blockquote>“Your movement is yours.<br>Make it <em>feel like you.”</em></blockquote><span>THE BELLISIMA PROMISE</span></section>
+  </main>
+  <footer><a class="wordmark" href="#home">bellisima<span>®</span></a><span>Move beautifully, every day.</span><span>© 2025 Bellisima Studio</span></footer>
+  <div class="overlay" id="overlay"></div>
+  <aside class="cart-drawer" id="cartDrawer" aria-label="Shopping bag" aria-hidden="true"><div class="drawer-head"><div><p class="eyebrow">YOUR GOOD THINGS</p><h2>Your bag <span id="drawerCount">(0)</span></h2></div><button class="close-button" data-close aria-label="Close bag">×</button></div><div class="cart-content" id="cartContent"></div><div class="cart-foot" id="cartFoot"></div></aside>
+  <section class="auth-modal" id="authModal" role="dialog" aria-modal="true" aria-labelledby="authTitle" aria-hidden="true"><button class="close-button auth-close" data-close aria-label="Close login">×</button><div class="auth-image"><img src="https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&w=1000&q=85" alt="Athlete training in a bright studio"><div class="auth-brand">bellisima<span>®</span><p>Find your own kind<br>of strong.</p></div></div><div class="auth-form"><p class="eyebrow">WELCOME TO YOUR SPACE</p><h2 id="authTitle">Move with us.</h2><p class="auth-sub">Log in or create an account to make your next move.</p><button class="google-button" id="googleLogin"><span class="google-g">G</span> Continue with Google</button><div class="divider"><span>or continue with email</span></div><form id="loginForm"><label for="email">Email address</label><input id="email" type="email" placeholder="you@example.com" required><label for="password">Password</label><input id="password" type="password" placeholder="At least 8 characters" minlength="8" required><button class="button button-dark" type="submit">Continue <span>→</span></button></form><p class="auth-terms">By continuing, you agree to our <a href="#">Terms</a> and <a href="#">Privacy Policy</a>.</p><p class="auth-message" id="authMessage"></p></div></section>
+  <div class="toast" id="toast" role="status"></div>
+  <script src="app.js"></script>
+</body>
+</html>
