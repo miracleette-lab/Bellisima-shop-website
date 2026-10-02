@@ -26,7 +26,7 @@ const ENV = loadEnv();
 const CLIENT_ID = ENV.GOOGLE_CLIENT_ID;
 const CLIENT_SECRET = ENV.GOOGLE_CLIENT_SECRET;
 const PORT = Number(ENV.PORT || 3000);
-const BASE_URL = (ENV.BASE_URL || ENV['BASE URL'] || `http://localhost:${PORT}`).replace(/\/$/, '');
+const BASE_URL = (ENV.BASE_URL || ENV['BASE URL'] || ENV.RENDER_EXTERNAL_URL || `http://localhost:${PORT}`).replace(/\/$/, '');
 const BASE_ORIGIN = new URL(BASE_URL).origin;
 const COOKIE_SECURE = new URL(BASE_URL).protocol === 'https:';
 const OAUTH_CALLBACK = `${BASE_URL}/auth/google/callback`;
@@ -43,43 +43,43 @@ if (!CLIENT_ID || !CLIENT_SECRET) {
   process.exit(1);
 }
 
+let database;
 if (!DATABASE_URL) {
-  console.error('Missing Supabase database connection string. Set SUPABASE_DATABASE_URL or SUPABASE DATABASE CONNECTION STRING in .env.');
-  process.exit(1);
-}
-
-const { Pool } = require('pg');
-const databaseConnection = new URL(DATABASE_URL);
-if (!['postgres:', 'postgresql:'].includes(databaseConnection.protocol)) {
-  console.error('The Supabase database connection string must start with postgres:// or postgresql://.');
-  process.exit(1);
-}
-if (DATABASE_PASSWORD) databaseConnection.password = DATABASE_PASSWORD;
-if (databaseConnection.password.includes('[YOUR-PASSWORD]')) {
-  console.error('Replace [YOUR-PASSWORD] in the Supabase connection string, or set SUPABASE DATABASE PASSWORD in .env.');
-  process.exit(1);
-}
-// Use verified TLS and avoid a connection-string sslmode overriding this setting.
-const certificateFromUrl = databaseConnection.searchParams.get('sslrootcert');
-const certificatePath = DATABASE_CERT_PATH || certificateFromUrl;
-let databaseSsl = { rejectUnauthorized: true };
-if (certificatePath) {
-  const fullCertificatePath = path.isAbsolute(certificatePath) ? certificatePath : path.resolve(ROOT, certificatePath);
-  try {
-    databaseSsl = { ca: fs.readFileSync(fullCertificatePath, 'utf8'), rejectUnauthorized: true };
-  } catch {
-    console.error('Could not read the Supabase root certificate. Check SUPABASE_DATABASE_SSL_CERT in .env.');
+  console.error('Supabase is not configured. Set SUPABASE_DATABASE_URL in the Render Environment settings to enable Google sign-in.');
+} else {
+  const { Pool } = require('pg');
+  const databaseConnection = new URL(DATABASE_URL);
+  if (!['postgres:', 'postgresql:'].includes(databaseConnection.protocol)) {
+    console.error('The Supabase database connection string must start with postgres:// or postgresql://.');
     process.exit(1);
   }
+  if (DATABASE_PASSWORD) databaseConnection.password = DATABASE_PASSWORD;
+  if (databaseConnection.password.includes('[YOUR-PASSWORD]')) {
+    console.error('Replace [YOUR-PASSWORD] in the Supabase connection string, or set SUPABASE_DATABASE_PASSWORD in Render Environment settings.');
+    process.exit(1);
+  }
+  // Use verified TLS and avoid a connection-string sslmode overriding this setting.
+  const certificateFromUrl = databaseConnection.searchParams.get('sslrootcert');
+  const certificatePath = DATABASE_CERT_PATH || certificateFromUrl;
+  let databaseSsl = { rejectUnauthorized: true };
+  if (certificatePath) {
+    const fullCertificatePath = path.isAbsolute(certificatePath) ? certificatePath : path.resolve(ROOT, certificatePath);
+    try {
+      databaseSsl = { ca: fs.readFileSync(fullCertificatePath, 'utf8'), rejectUnauthorized: true };
+    } catch {
+      console.error('Could not read the Supabase root certificate. Check SUPABASE_DATABASE_SSL_CERT in Render Environment settings.');
+      process.exit(1);
+    }
+  }
+  for (const option of ['sslmode', 'ssl', 'sslcert', 'sslkey', 'sslrootcert']) databaseConnection.searchParams.delete(option);
+  database = new Pool({
+    connectionString: databaseConnection.toString(),
+    ssl: databaseSsl,
+    max: 5,
+    connectionTimeoutMillis: 10000,
+    idleTimeoutMillis: 30000
+  });
 }
-for (const option of ['sslmode', 'ssl', 'sslcert', 'sslkey', 'sslrootcert']) databaseConnection.searchParams.delete(option);
-const database = new Pool({
-  connectionString: databaseConnection.toString(),
-  ssl: databaseSsl,
-  max: 5,
-  connectionTimeoutMillis: 10000,
-  idleTimeoutMillis: 30000
-});
 
 function randomToken(bytes = 32) {
   return crypto.randomBytes(bytes).toString('base64url');
@@ -166,6 +166,11 @@ async function getGoogleProfile(accessToken) {
 }
 
 async function saveGoogleUser(profile) {
+  if (!database) {
+    const error = new Error('Supabase is not configured. Add SUPABASE_DATABASE_URL to the Render service environment.');
+    error.stage = 'database';
+    throw error;
+  }
   try {
     const result = await database.query(
       `INSERT INTO public.users (google_sub, email, full_name, avatar_url)
@@ -210,6 +215,10 @@ function serveStatic(req, res, pathname) {
 async function handle(req, res) {
   const url = new URL(req.url, BASE_URL);
   const cookies = parseCookies(req.headers.cookie);
+
+  if (req.method === 'GET' && url.pathname === '/healthz') {
+    return send(res, 200, JSON.stringify({ ok: true, databaseConfigured: Boolean(database) }), 'application/json; charset=utf-8', { 'Cache-Control': 'no-store' });
+  }
 
   if (req.method === 'GET' && url.pathname === '/auth/google') {
     const state = randomToken();
@@ -285,4 +294,4 @@ const server = http.createServer((req, res) => {
   });
 });
 
-server.listen(PORT, () => console.log(`Bellisima is running at ${BASE_URL}`));
+server.listen(PORT, '0.0.0.0', () => console.log(`Bellisima is running at ${BASE_URL}`));

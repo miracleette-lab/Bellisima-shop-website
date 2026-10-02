@@ -4,7 +4,7 @@
   "private": true,
   "description": "Bellisima fitness storefront with Google OAuth sign-in",
   "scripts": {
-    "start": "node server.js",
+    "start": "node api.js && node server.js",
     "db:check": "node supabase/check-db.js"
   },
   "dependencies": {
