@@ -17,6 +17,12 @@ In Google Cloud Console, configure the OAuth consent screen and add these values
 
 The redirect URI must match exactly. For deployment, set `BASE_URL` to the public HTTPS origin and add `${BASE_URL}/auth/google/callback` as an authorized redirect URI. Keep `.env` private; the client secret is read only by the server and is never sent to the browser.
 
+## Deploy on Render
+
+Create a **Web Service** connected to this repository. Render's build command can be left blank (or set to `npm install`), and the start command is `npm start`. In the service's **Environment** settings, add `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, and `SUPABASE_DATABASE_URL` with the values from Google Cloud and Supabase. Optionally add `SUPABASE_DATABASE_PASSWORD` if the password is not already part of the connection URL. Set `BASE_URL` to the Render service's public `https://...onrender.com` URL, then add `https://...onrender.com/auth/google/callback` to the Google OAuth client's authorized redirect URIs. Render does not read your computer's local `.env` file automatically; environment values must be added to the service settings.
+
+The storefront can start if `SUPABASE_DATABASE_URL` is missing, but Google sign-in cannot save or sign in users until that variable is set. The `/healthz` endpoint reports whether the database connection is configured.
+
 ## Save Google users in Supabase
 
 The server uses the PostgreSQL connection string and database password from `.env`. It accepts `SUPABASE_DATABASE_URL` and `SUPABASE_DATABASE_PASSWORD`, or the existing keys named `SUPABASE DATABASE CONNECTION STRING` and `SUPABASE DATABASE PASSWORD`.
