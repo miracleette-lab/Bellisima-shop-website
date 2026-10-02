@@ -1,0 +1,16 @@
+{
+  "name": "bellisima-shop-website",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Bellisima fitness storefront with Google OAuth sign-in",
+  "scripts": {
+    "start": "node server.js",
+    "db:check": "node supabase/check-db.js"
+  },
+  "dependencies": {
+    "pg": "^8.23.1"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
